@@ -1,16 +1,16 @@
 package models;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class StockStore {
-    private Map<Integer, Stock> stocks = new HashMap<>();
+    private Set<Stock> stocks = new HashSet<>();
 
     public Optional<Stock> add(Stock stock) {
-        int id = stocks.size();
-        stock.setId(id);
-        stocks.put(id, stock);
+        stocks.add(stock);
         return Optional.ofNullable(stock);
+    }
+
+    public boolean remove(Stock stock) {
+        return stocks.remove(stock);
     }
 }

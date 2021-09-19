@@ -26,10 +26,21 @@ public class StocksControllerTest extends WithApplication {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(POST)
                 .bodyJson(Json.toJson(new Stock("PLTR")))
-                .uri("/add");
+                .uri("/");
 
         Result result = route(app, request);
         assertEquals(CREATED, result.status());
+    }
+
+    @Test
+    public void testRemove() {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(DELETE)
+                .bodyJson(Json.toJson(new Stock("PLTR")))
+                .uri("/");
+
+        Result result = route(app, request);
+        assertEquals(OK, result.status());
     }
 
 }

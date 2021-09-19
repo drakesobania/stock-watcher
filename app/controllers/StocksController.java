@@ -1,7 +1,6 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Stock;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
@@ -13,11 +12,9 @@ import utils.Util;
 
 import javax.inject.Inject;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-
 
 
 public class StocksController extends Controller {
@@ -43,6 +40,24 @@ public class StocksController extends Controller {
                 JsonNode jsonObject = Json.toJson(stock);
                 return created(Util.createResponse(jsonObject, true));
             }).orElse(internalServerError(Util.createResponse("Could not create data.", false)));
+        }, httpExecutionContext.current());
+    }
+
+    public CompletionStage<Result> remove(Http.Request request) {
+        JsonNode json = request.body().asJson();
+        return supplyAsync(() -> {
+            if (json == null) {
+                return badRequest(Util.createResponse("Expecting Json data", false));
+            }
+
+            Optional<Stock> stockOptional = stockStore.add(Json.fromJson(json, Stock.class));
+            return stockOptional.map(stock -> {
+                boolean status = stockStore.remove(stock);
+                if (!status) {
+                    return notFound(Util.createResponse("Stock with symbol:" + stock.getSymbol() + " not found", false));
+                }
+                return ok(Util.createResponse("Stock with symbol:" + stock.getSymbol() + " deleted", true));
+            }).orElse(internalServerError(Util.createResponse("Could not read data.", false)));
         }, httpExecutionContext.current());
     }
 }
