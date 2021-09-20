@@ -1,45 +1,61 @@
 package models;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StockStore {
-    private HashMap<Integer, Stock> stocks = new HashMap<>();
+    private Set<Stock> stocks = new HashSet<>();
+    private final File file = new File("stocks.txt");
 
-    public Optional<Stock> add(Stock stock) {
-        try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("stocks.txt"));
-            bufferedWriter.append(stock.getSymbol() + "\n");
-            bufferedWriter.close();
+    private void read() {
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            try (ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+                stocks = (Set<Stock>) objectInputStream.readObject();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            // file is not there, just keep going
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void write() {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+                objectOutputStream.writeObject(stocks);
+            }
+        } catch (FileNotFoundException e) {
+            // file is not there, just keep going
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Optional<Stock> add(Stock stock) {
+        read();
+        stocks.add(stock);
+        write();
         return Optional.ofNullable(stock);
     }
 
     public boolean remove(Stock stock) {
-        boolean deleted = false;
-        try {
-            File currentFile = new File("stocks.txt");
-            File newFile = new File("stocks.tmp");
-
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(newFile));
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(currentFile));
-            String currentLine;
-            while((currentLine = bufferedReader.readLine()) != null) {
-                if (currentLine.equals(stock.getSymbol())) {
-                    deleted = true;
-                    continue;
-                }
-                bufferedWriter.append(currentLine + "\n");
-            }
-            bufferedWriter.close();
-            bufferedReader.close();
-            currentFile.delete();
-            newFile.renameTo(currentFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        read();
+        boolean deleted = stocks.remove(stock);
+        write();
         return deleted;
+    }
+
+    public List<String> getAll() {
+        read();
+        return stocks
+                .stream()
+                .map(Stock::getSymbol)
+                .collect(Collectors.toList());
     }
 }

@@ -57,4 +57,11 @@ public class StocksController extends Controller {
             }).orElse(internalServerError(Util.createResponse("Could not read data.", false)));
         }, httpExecutionContext.current());
     }
+
+    public CompletionStage<Result> get() {
+        return supplyAsync(() -> {
+            JsonNode jsonObject = Json.toJson(stockStore.getAll());
+            return created(Util.createResponse(jsonObject, true));
+        });
+    }
 }

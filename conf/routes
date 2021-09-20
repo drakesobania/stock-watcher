@@ -1,2 +1,3 @@
 POST    /                        controllers.StocksController.add(request: Request)
 DELETE  /                        controllers.StocksController.remove(request: Request)
+GET     /                        controllers.StocksController.get()
