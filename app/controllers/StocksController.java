@@ -52,10 +52,7 @@ public class StocksController extends Controller {
 
             Optional<Stock> stockOptional = stockStore.add(Json.fromJson(json, Stock.class));
             return stockOptional.map(stock -> {
-                boolean status = stockStore.remove(stock);
-                if (!status) {
-                    return notFound(Util.createResponse("Stock with symbol:" + stock.getSymbol() + " not found", false));
-                }
+                stockStore.remove(stock);
                 return ok(Util.createResponse("Stock with symbol:" + stock.getSymbol() + " deleted", true));
             }).orElse(internalServerError(Util.createResponse("Could not read data.", false)));
         }, httpExecutionContext.current());
