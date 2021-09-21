@@ -51,11 +51,10 @@ public class StockStore {
         return deleted;
     }
 
-    public List<String> getAll() {
+    public List<Stock> getAll() {
         read();
         return stocks
                 .stream()
-                .map(Stock::getSymbol)
                 .collect(Collectors.toList());
     }
 }

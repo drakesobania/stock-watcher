@@ -4,13 +4,25 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Stock implements Serializable {
-    private static final long serialVersionUID = 33L;
+    private static final long serialVersionUID = 34L;
     private String symbol;
+    private double price;
+    private double change;
 
     public Stock() {}
 
     public Stock(String symbol) {
-        this.symbol = symbol;
+        this.setSymbol(symbol);
+    }
+
+    public Stock(String symbol, double price, double change) {
+        this.setSymbol(symbol);
+        this.setPrice(price);
+        this.setChange(change);
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
     public String getSymbol() {
@@ -26,11 +38,27 @@ public class Stock implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Stock stock = (Stock) o;
-        return Objects.equals(symbol, stock.symbol);
+        return Objects.equals(getSymbol(), stock.getSymbol());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(symbol);
+        return Objects.hash(getSymbol());
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getChange() {
+        return change;
+    }
+
+    public void setChange(double change) {
+        this.change = change;
     }
 }
