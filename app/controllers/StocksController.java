@@ -1,10 +1,8 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import models.Quote;
 import models.Stock;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
@@ -15,13 +13,9 @@ import models.StockStore;
 import utils.Util;
 
 import javax.inject.Inject;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletionStage;
@@ -139,9 +133,7 @@ public class StocksController extends Controller {
                     "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + stock.getSymbol() + "&apikey=O0E8CRJWEWC6WVH0");
         } catch (MalformedURLException e) {
             e.printStackTrace();
-        }
-        Map<String, Map<?, ?>> map = new HashMap<>();
-        ObjectMapper objectMapper = new ObjectMapper();
+        };
         double price = 0;
         double change = 0;
         try {
