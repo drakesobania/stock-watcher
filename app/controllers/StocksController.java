@@ -83,7 +83,7 @@ public class StocksController extends Controller {
                                         getAverage(stock, interval, timePeriod, seriesType));
                             })
                             .collect(Collectors.toList()));
-            return created(Util.createResponse(jsonObject, true));
+            return ok(Util.createResponse(jsonObject, true));
         });
     }
 
