@@ -43,10 +43,11 @@ public class StocksController extends Controller {
             }
 
             Optional<Stock> stockOptional = stockStore.add(Json.fromJson(json, Stock.class));
-            return stockOptional.map(stock -> {
-                JsonNode jsonObject = Json.toJson(stock);
-                return created(Util.createResponse(jsonObject, true));
-            }).orElse(internalServerError(Util.createResponse("Could not create data.", false)));
+            return stockOptional.map(
+                    stock -> created(
+                            Util.createResponse(
+                                    "Stock with symbol:" + stock.getSymbol() + " created", true)))
+                    .orElse(internalServerError(Util.createResponse("Could not create data.", false)));
         }, httpExecutionContext.current());
     }
 
