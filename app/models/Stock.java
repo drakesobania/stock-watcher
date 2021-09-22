@@ -8,6 +8,7 @@ public class Stock implements Serializable {
     private String symbol;
     private double price;
     private double change;
+    private Double average;
 
     public Stock() {}
 
@@ -15,10 +16,11 @@ public class Stock implements Serializable {
         this.setSymbol(symbol);
     }
 
-    public Stock(String symbol, double price, double change) {
+    public Stock(String symbol, double price, double change, Double average) {
         this.setSymbol(symbol);
         this.setPrice(price);
         this.setChange(change);
+        this.setAverage(average);
     }
 
     public static long getSerialVersionUID() {
@@ -60,5 +62,13 @@ public class Stock implements Serializable {
 
     public void setChange(double change) {
         this.change = change;
+    }
+
+    public Double getAverage() {
+        return average;
+    }
+
+    public void setAverage(Double average) {
+        this.average = average;
     }
 }

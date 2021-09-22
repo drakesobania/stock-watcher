@@ -74,37 +74,88 @@ public class StocksController extends Controller {
         }, httpExecutionContext.current());
     }
 
-    public CompletionStage<Result> get() {
+    public CompletionStage<Result> get(
+            Optional<String> interval, Optional<Integer> timePeriod, Optional<String> seriesType) {
         return supplyAsync(() -> {
             JsonNode jsonObject = Json.toJson(
                     stockStore
                             .getAll()
                             .stream()
                             .map(stock -> {
-                                URL url = null;
-                                try {
-                                    url = new URL(
-                                            "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + stock.getSymbol() + "&apikey=O0E8CRJWEWC6WVH0");
-                                } catch (MalformedURLException e) {
-                                    e.printStackTrace();
-                                }
-                                Map<String, Map<?, ?>> map = new HashMap<>();
-                                ObjectMapper objectMapper = new ObjectMapper();
-                                double price = 0;
-                                double change = 0;
-                                try {
-                                    InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
-                                    JsonObject response = JsonParser.parseReader(inputStreamReader).getAsJsonObject();
-                                    JsonObject globalQuote = response.get("Global Quote").getAsJsonObject();
-                                    price = globalQuote.get("05. price").getAsDouble();
-                                    change = globalQuote.get("09. change").getAsDouble();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                return new Stock(stock.getSymbol(), price, change);
+                                double [] quote = getQuote(stock);
+                                double price = quote[0];
+                                double change = quote[1];
+                                return new Stock(
+                                        stock.getSymbol(),
+                                        price,
+                                        change,
+                                        getAverage(stock, interval, timePeriod, seriesType));
                             })
                             .collect(Collectors.toList()));
             return created(Util.createResponse(jsonObject, true));
         });
+    }
+
+    private Double getAverage(Stock stock, Optional<String> interval, Optional<Integer> timePeriod, Optional<String> seriesType) {
+        if (!interval.isPresent() || !timePeriod.isPresent() || !seriesType.isPresent()) {
+            return null;
+        }
+        URL url = null;
+        try {
+            url = new URL(
+                    "https://www.alphavantage.co/query?function=SMA&symbol=" +
+                            stock.getSymbol() +
+                            "&interval=" + interval.get() +
+                            "&time_period=" + timePeriod.get() +
+                            "&series_type=" + seriesType.get() +
+                            "&apikey=O0E8CRJWEWC6WVH0");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        double average = 0;
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
+            JsonObject response = JsonParser.parseReader(inputStreamReader).getAsJsonObject();
+            JsonObject technicalAnalysis = response.get("Technical Analysis: SMA").getAsJsonObject();
+            String latestDate = technicalAnalysis
+                    .keySet()
+                    .stream()
+                    .sorted()
+                    .findFirst()
+                    .get();
+            average = technicalAnalysis
+                    .get(latestDate)
+                    .getAsJsonObject()
+                    .get("SMA")
+                    .getAsDouble();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return average;
+    }
+
+    private double[] getQuote(Stock stock) {
+        URL url = null;
+        try {
+            url = new URL(
+                    "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + stock.getSymbol() + "&apikey=O0E8CRJWEWC6WVH0");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        Map<String, Map<?, ?>> map = new HashMap<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        double price = 0;
+        double change = 0;
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
+            JsonObject response = JsonParser.parseReader(inputStreamReader).getAsJsonObject();
+            JsonObject globalQuote = response.get("Global Quote").getAsJsonObject();
+            price = globalQuote.get("05. price").getAsDouble();
+            change = globalQuote.get("09. change").getAsDouble();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new double[]{price, change};
     }
 }
