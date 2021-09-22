@@ -23,10 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -120,7 +117,7 @@ public class StocksController extends Controller {
             String latestDate = technicalAnalysis
                     .keySet()
                     .stream()
-                    .sorted()
+                    .sorted(Comparator.reverseOrder())
                     .findFirst()
                     .get();
             average = technicalAnalysis
